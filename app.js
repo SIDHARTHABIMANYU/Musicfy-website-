@@ -84,7 +84,17 @@ const handleLogout = async () => {
 const setupAuthListener = () => {
   const loadingScreen = document.getElementById('auth-loading');
   
+  // Safety timeout: Always hide loading screen after 5 seconds
+  const safetyTimeout = setTimeout(() => {
+    if (loadingScreen && loadingScreen.style.display !== 'none') {
+      console.warn('Auth check taking long... hiding loading screen anyway.');
+      loadingScreen.style.opacity = '0';
+      setTimeout(() => loadingScreen.style.display = 'none', 300);
+    }
+  }, 5000);
+
   onAuthStateChanged(auth, (user) => {
+    clearTimeout(safetyTimeout);
     if (user) {
       currentUser = user;
       updateUserUI(user);
