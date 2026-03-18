@@ -1,0 +1,708 @@
+<!doctype html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Musicfy — Agentic Music Experience</title>
+  <link rel="stylesheet" href="/styles.css" />
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
+  <!-- Lucide Icons -->
+  <script src="https://unpkg.com/lucide@latest"></script>
+
+</head>
+
+<body>
+  <!-- Loading Screen -->
+  <div id="auth-loading"
+    style="position: fixed; inset: 0; background: var(--gradient-main); display: flex; align-items: center; justify-content: center; z-index: 9999;">
+    <div style="text-align: center;">
+      <div
+        style="width: 60px; height: 60px; border: 3px solid rgba(156, 39, 176, 0.2); border-top-color: #e91e63; border-radius: 50%; animation: spin 1s linear infinite; margin: 0 auto 20px;">
+      </div>
+      <p style="color: var(--text-secondary);">Loading Musicfy...</p>
+    </div>
+    <style>
+      @keyframes spin {
+        to {
+          transform: rotate(360deg);
+        }
+      }
+    </style>
+  </div>
+
+  <div class="layout" id="main-app">
+    <!-- Left Sidebar -->
+    <aside class="sidebar left-sidebar" id="left-sidebar">
+      <div class="brand" id="brand-logo" style="cursor: pointer;">
+        <div class="logo">♪</div>
+        <div>
+          <h1>Musicfy</h1>
+          <p>AI-Powered Music</p>
+        </div>
+      </div>
+
+      <nav class="nav-icons">
+        <button class="nav-icon-btn active" id="ai-dj-btn" title="AI DJ">
+          <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
+            stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <circle cx="12" cy="12" r="10" />
+            <circle cx="12" cy="12" r="3" />
+            <path d="M12 2v4" />
+            <path d="M12 18v4" />
+            <path d="m4.93 4.93 2.83 2.83" />
+            <path d="m16.24 16.24 2.83 2.83" />
+            <path d="M2 12h4" />
+            <path d="M18 12h4" />
+            <path d="m4.93 19.07 2.83-2.83" />
+            <path d="m16.24 7.76 2.83-2.83" />
+          </svg>
+          <span class="nav-tooltip">AI DJ</span>
+        </button>
+        <button class="nav-icon-btn" id="mood-btn" title="Mood Selector">
+          <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
+            stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <circle cx="12" cy="12" r="10" />
+            <path d="M8 14s1.5 2 4 2 4-2 4-2" />
+            <line x1="9" x2="9.01" y1="9" y2="9" />
+            <line x1="15" x2="15.01" y1="9" y2="9" />
+          </svg>
+          <span class="nav-tooltip">Mood</span>
+        </button>
+        <button class="nav-icon-btn" id="history-btn" title="History">
+          <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
+            stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8" />
+            <path d="M3 3v5h5" />
+            <path d="M12 7v5l4 2" />
+          </svg>
+          <span class="nav-tooltip">History</span>
+        </button>
+        <button class="nav-icon-btn" id="playlists-btn" title="Playlists">
+          <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
+            stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M21 15V6" />
+            <path d="M18.5 18a2.5 2.5 0 1 0 0-5 2.5 2.5 0 0 0 0 5Z" />
+            <path d="M12 12H3" />
+            <path d="M16 6H3" />
+            <path d="M12 18H3" />
+          </svg>
+          <span class="nav-tooltip">Playlists</span>
+        </button>
+        <button class="nav-icon-btn" id="search-nav-btn" title="Search">
+          <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
+            stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <circle cx="11" cy="11" r="8" />
+            <path d="m21 21-4.3-4.3" />
+          </svg>
+          <span class="nav-tooltip">Search</span>
+        </button>
+        <button class="nav-icon-btn upload-btn" id="upload-btn" title="Upload Songs">
+          <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
+            stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
+            <polyline points="17 8 12 3 7 8" />
+            <line x1="12" x2="12" y1="3" y2="15" />
+          </svg>
+          <span class="nav-tooltip">Upload</span>
+        </button>
+      </nav>
+
+      <div class="sidebar-divider"></div>
+
+      <div class="playlists-compact" id="playlists-compact">
+        <p class="nav-title">My Library</p>
+        <button class="add-playlist-btn" title="Create new playlist">
+          <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none"
+            stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M5 12h14" />
+            <path d="M12 5v14" />
+          </svg>
+        </button>
+        <div id="playlists-list" class="playlists-list"></div>
+      </div>
+
+      <!-- Left Resize Handle -->
+      <div class="resize-handle resize-handle-right" id="left-resize-handle"></div>
+    </aside>
+
+    <!-- Main Content -->
+    <main class="main">
+      <header class="topbar">
+        <div class="greeting" id="greeting">
+          <h1>Good Morning 🎵</h1>
+          <p>What do you want to listen to today?</p>
+        </div>
+        <div class="top-actions">
+          <span class="status-pill" id="backend-status">Checking…</span>
+          <button class="pill-btn" id="refresh" title="Refresh">
+            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none"
+              stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M3 12a9 9 0 0 1 9-9 9.75 9.75 0 0 1 6.74 2.74L21 8" />
+              <path d="M21 3v5h-5" />
+              <path d="M21 12a9 9 0 0 1-9 9 9.75 9.75 0 0 1-6.74-2.74L3 16" />
+              <path d="M8 16H3v5" />
+            </svg>
+          </button>
+          <div class="user-menu" id="user-menu">
+            <div class="avatar" title="Account">U</div>
+            <div class="user-dropdown" id="user-dropdown">
+              <div class="user-info">
+                <img id="user-avatar" src="" alt="Avatar" />
+                <div>
+                  <p id="user-name">User</p>
+                  <p id="user-email">email@example.com</p>
+                </div>
+              </div>
+              <div class="dropdown-divider"></div>
+              <button class="dropdown-item" id="logout-btn">
+                <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none"
+                  stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4" />
+                  <polyline points="16 17 21 12 16 7" />
+                  <line x1="21" x2="9" y1="12" y2="12" />
+                </svg>
+                Sign Out
+              </button>
+            </div>
+          </div>
+        </div>
+      </header>
+
+      <!-- Mood Section -->
+      <section class="mood-section" id="mood-section">
+        <h2 class="section-title-text">How are you feeling?</h2>
+        <div class="mood-buttons">
+          <button class="mood-btn" data-mood="happy">
+            <span class="mood-emoji">😊</span>
+            <span class="mood-label">Happy</span>
+          </button>
+          <button class="mood-btn" data-mood="sad">
+            <span class="mood-emoji">😢</span>
+            <span class="mood-label">Sad</span>
+          </button>
+          <button class="mood-btn" data-mood="focus">
+            <span class="mood-emoji">🎯</span>
+            <span class="mood-label">Focus</span>
+          </button>
+          <button class="mood-btn" data-mood="energy">
+            <span class="mood-emoji">⚡</span>
+            <span class="mood-label">Energy</span>
+          </button>
+          <button class="mood-btn" data-mood="chill">
+            <span class="mood-emoji">😌</span>
+            <span class="mood-label">Chill</span>
+          </button>
+          <button class="mood-btn" data-mood="romantic">
+            <span class="mood-emoji">💕</span>
+            <span class="mood-label">Romantic</span>
+          </button>
+        </div>
+      </section>
+
+      <!-- Search Section -->
+      <section class="search-section" id="search-section">
+        <div class="search-box">
+          <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none"
+            stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <circle cx="11" cy="11" r="8" />
+            <path d="m21 21-4.3-4.3" />
+          </svg>
+          <input type="text" id="search-input" placeholder="Search for songs, artists..." />
+          <button id="search-btn" class="search-submit">Search</button>
+        </div>
+      </section>
+
+      <!-- AI Generated Playlists -->
+      <section class="section auto-playlists" id="auto-playlists-section">
+        <div class="section-header">
+          <h2>🎵 Made For You</h2>
+          <p>AI-curated playlists based on your mood</p>
+        </div>
+        <div class="playlists-grid" id="auto-playlists-grid">
+          <div class="playlist-card" data-type="morning">
+            <div class="playlist-cover morning">
+              <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none"
+                stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <circle cx="12" cy="12" r="4" />
+                <path d="M12 2v2" />
+                <path d="M12 20v2" />
+                <path d="m4.93 4.93 1.41 1.41" />
+                <path d="m17.66 17.66 1.41 1.41" />
+                <path d="M2 12h2" />
+                <path d="M20 12h2" />
+                <path d="m6.34 17.66-1.41 1.41" />
+                <path d="m19.07 4.93-1.41 1.41" />
+              </svg>
+            </div>
+            <h3>Morning Vibes</h3>
+            <span>Start your day right</span>
+          </div>
+          <div class="playlist-card" data-type="workout">
+            <div class="playlist-cover workout">
+              <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none"
+                stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="m6.5 6.5 11 11" />
+                <path d="m21 21-1-1" />
+                <path d="m3 3 1 1" />
+                <path d="m18 22 4-4" />
+                <path d="m2 6 4-4" />
+                <path d="m3 10 7-7" />
+                <path d="m14 21 7-7" />
+              </svg>
+            </div>
+            <h3>Workout Mix</h3>
+            <span>High energy beats</span>
+          </div>
+          <div class="playlist-card" data-type="chill">
+            <div class="playlist-cover chill">
+              <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none"
+                stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M17.5 19H9a7 7 0 1 1 6.71-9h1.79a4.5 4.5 0 1 1 0 9Z" />
+              </svg>
+            </div>
+            <h3>Chill Mode</h3>
+            <span>Relax and unwind</span>
+          </div>
+          <div class="playlist-card" data-type="focus">
+            <div class="playlist-cover focus">
+              <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none"
+                stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7Z" />
+                <circle cx="12" cy="12" r="3" />
+              </svg>
+            </div>
+            <h3>Deep Focus</h3>
+            <span>Concentrate better</span>
+          </div>
+          <!-- Uploaded Songs Card -->
+          <div class="playlist-card" data-type="uploaded" id="uploaded-card" style="display: none;">
+            <div class="playlist-cover uploaded">
+              <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none"
+                stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path
+                  d="M4 20h16a2 2 0 0 0 2-2V8a2 2 0 0 0-2-2h-7.93a2 2 0 0 1-1.66-.9l-.82-1.2A2 2 0 0 0 7.93 3H4a2 2 0 0 0-2 2v13c0 1.1.9 2 2 2Z" />
+                <path d="M12 10v6" />
+                <path d="m9 13 3-3 3 3" />
+              </svg>
+            </div>
+            <h3>My Uploads</h3>
+            <span id="uploaded-card-count">0 songs</span>
+          </div>
+        </div>
+      </section>
+
+      <!-- Search Results / Now Playing -->
+      <section class="section results" id="results-section" style="display: none;">
+        <div class="section-header">
+          <h2>🔍 Search Results</h2>
+          <p>Find your favorite songs</p>
+        </div>
+
+        <div class="results-grid" id="results-grid"></div>
+      </section>
+
+      <!-- AI DJ Section -->
+      <section class="section ai-dj-section" id="ai-dj-section" style="display: none;">
+        <div class="section-header">
+          <h2>🎧 AI DJ Mode</h2>
+          <p>Let our AI curate the perfect mix for you</p>
+        </div>
+        <div class="ai-dj-content">
+          <div class="dj-avatar">
+            <div class="dj-pulse"></div>
+            <svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 24 24" fill="none"
+              stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <circle cx="12" cy="12" r="10" />
+              <circle cx="12" cy="12" r="3" />
+              <path d="M12 2v4" />
+              <path d="M12 18v4" />
+            </svg>
+          </div>
+          <h3>AI DJ is ready!</h3>
+          <p>Select a mood above and I'll create the perfect playlist for you.</p>
+          <button class="glow-btn" id="start-dj-btn">Start AI Mix</button>
+        </div>
+      </section>
+
+      <!-- History Section -->
+      <section class="section history-section" id="history-section" style="display: none;">
+        <div class="section-header">
+          <h2>⏱️ Recently Played</h2>
+          <p>Your listening history</p>
+        </div>
+        <div class="history-list" id="history-list">
+          <p class="empty-state">No history yet. Start playing some music!</p>
+        </div>
+      </section>
+
+      <!-- Playlists Management Section -->
+      <section class="section playlists-manage-section" id="playlists-manage-section" style="display: none;">
+        <div class="section-header">
+          <h2>📀 My Playlists</h2>
+          <p>Manage your music collections</p>
+        </div>
+        <div class="playlists-manage-grid" id="playlists-manage-grid"></div>
+      </section>
+    </main>
+
+    <!-- Right Sidebar -->
+    <aside class="sidebar right-sidebar" id="right-sidebar">
+      <!-- Right Resize Handle -->
+      <div class="resize-handle resize-handle-left" id="right-resize-handle"></div>
+
+      <nav class="nav-icons right-nav">
+        <button class="nav-icon-btn active" id="lyrics-btn" title="Lyrics">
+          <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
+            stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M9 18V5l12-2v13" />
+            <circle cx="6" cy="18" r="3" />
+            <circle cx="18" cy="16" r="3" />
+          </svg>
+          <span class="nav-tooltip">Lyrics</span>
+        </button>
+        <button class="nav-icon-btn" id="related-btn" title="Related Tracks">
+          <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
+            stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="m16 6 4 14" />
+            <path d="M12 6v14" />
+            <path d="M8 8v12" />
+            <path d="M4 4v16" />
+          </svg>
+          <span class="nav-tooltip">Related</span>
+        </button>
+        <button class="nav-icon-btn" id="artist-btn" title="Artist Info">
+          <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
+            stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2" />
+            <circle cx="12" cy="7" r="4" />
+          </svg>
+          <span class="nav-tooltip">Artist</span>
+        </button>
+        <button class="nav-icon-btn" id="queue-btn" title="Queue">
+          <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
+            stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M12 8V4H8" />
+            <rect width="16" height="12" x="4" y="8" rx="2" />
+            <path d="m10 12 4 2-4 2v-4Z" />
+          </svg>
+          <span class="nav-tooltip">Queue</span>
+        </button>
+      </nav>
+
+      <div class="sidebar-divider"></div>
+
+      <!-- Lyrics Panel -->
+      <div class="right-panel-content" id="lyrics-panel">
+        <h3>🎤 Lyrics</h3>
+        <div class="lyrics-content" id="lyrics-content">
+          <p class="empty-state">Play a song to see lyrics</p>
+        </div>
+      </div>
+
+      <!-- Related Tracks Panel -->
+      <div class="right-panel-content" id="related-panel" style="display: none;">
+        <h3>🎵 Related Tracks</h3>
+        <div class="related-list" id="related-list">
+          <p class="empty-state">Play a song to see related tracks</p>
+        </div>
+      </div>
+
+      <!-- Artist Info Panel -->
+      <div class="right-panel-content" id="artist-panel" style="display: none;">
+        <h3>👤 Artist Info</h3>
+        <div class="artist-content" id="artist-content">
+          <p class="empty-state">Play a song to see artist info</p>
+        </div>
+      </div>
+
+      <!-- Queue Panel -->
+      <div class="right-panel-content" id="queue-panel" style="display: none;">
+        <h3>📋 Up Next</h3>
+        <div class="queue-list" id="queue-list">
+          <p class="empty-state">Queue is empty</p>
+        </div>
+      </div>
+    </aside>
+  </div>
+
+  <!-- Chat Widget -->
+  <div id="chat-widget" class="chat-widget">
+    <button id="chat-toggle" class="chat-toggle">
+      <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
+        stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z" />
+      </svg>
+    </button>
+    <div id="chat-window" class="chat-window">
+      <div class="chat-header">
+        <div>
+          <h3>AI Music Assistant</h3>
+          <p>Type "play [song name]" to play music</p>
+        </div>
+        <button id="chat-close" class="chat-close">×</button>
+      </div>
+      <div id="chat-messages" class="chat-messages">
+        <div class="chat-bubble">
+          👋 Hi! I can help you play songs. Just type "play [song name]"
+        </div>
+      </div>
+      <div class="chat-input">
+        <input id="chat-input" type="text" placeholder="Type a message..." />
+        <button id="chat-send">
+          <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none"
+            stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="m22 2-7 20-4-9-9-4Z" />
+            <path d="M22 2 11 13" />
+          </svg>
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Bottom Music Player Bar -->
+  <div id="audio-player" class="player-bar" style="display: none;">
+    <audio id="song-audio" style="display: none;"></audio>
+
+    <!-- Top Progress Bar -->
+    <div class="player-top-progress" id="top-progress-container">
+      <div class="top-progress-fill" id="top-progress-fill"></div>
+      <input type="range" id="top-progress-slider" min="0" max="100" value="0" />
+    </div>
+
+    <!-- Left: Song Info -->
+    <div class="player-left">
+      <div class="player-thumbnail" id="now-playing-art">
+        <img src="/thumbnail.jpg" alt="Now Playing" />
+      </div>
+      <div class="player-song-info">
+        <span class="player-song-title" id="song-title">Select a song</span>
+        <span class="player-song-artist" id="song-artist">Artist</span>
+      </div>
+      <button class="player-like-btn" id="like-btn" title="Like">
+        <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none"
+          stroke="currentColor" stroke-width="2">
+          <path
+            d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z">
+          </path>
+        </svg>
+      </button>
+    </div>
+
+    <!-- Center: Controls + Progress -->
+    <div class="player-center">
+      <div class="player-controls">
+        <button class="control-btn" id="shuffle-btn" title="Shuffle">
+          <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none"
+            stroke="currentColor" stroke-width="2">
+            <polyline points="16 3 21 3 21 8"></polyline>
+            <line x1="4" y1="20" x2="21" y2="3"></line>
+            <polyline points="21 16 21 21 16 21"></polyline>
+            <line x1="15" y1="15" x2="21" y2="21"></line>
+            <line x1="4" y1="4" x2="9" y2="9"></line>
+          </svg>
+        </button>
+        <button class="control-btn" id="prev-btn" title="Previous">
+          <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
+            <path d="M6 6h2v12H6zm3.5 6l8.5 6V6z" />
+          </svg>
+        </button>
+        <button class="control-btn play-btn" id="play-pause-btn" title="Play">
+          <svg class="play-icon" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"
+            fill="currentColor">
+            <polygon points="5 3 19 12 5 21 5 3" />
+          </svg>
+          <svg class="pause-icon" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"
+            fill="currentColor" style="display:none;">
+            <rect x="6" y="4" width="4" height="16" />
+            <rect x="14" y="4" width="4" height="16" />
+          </svg>
+        </button>
+        <button class="control-btn" id="next-btn" title="Next">
+          <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
+            <path d="M6 18l8.5-6L6 6v12zM16 6v12h2V6h-2z" />
+          </svg>
+        </button>
+        <button class="control-btn" id="repeat-btn" title="Repeat">
+          <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none"
+            stroke="currentColor" stroke-width="2">
+            <polyline points="17 1 21 5 17 9"></polyline>
+            <path d="M3 11V9a4 4 0 0 1 4-4h14"></path>
+            <polyline points="7 23 3 19 7 15"></polyline>
+            <path d="M21 13v2a4 4 0 0 1-4 4H3"></path>
+          </svg>
+        </button>
+      </div>
+      <div class="player-progress">
+        <span class="time-current" id="time-current">0:00</span>
+        <div class="progress-bar-container" id="progress-container">
+          <div class="progress-bar-bg">
+            <div class="progress-bar-fill" id="progress-fill"></div>
+          </div>
+          <input type="range" class="progress-slider" id="progress-slider" min="0" max="100" value="0" />
+        </div>
+        <span class="time-total" id="time-total">0:00</span>
+      </div>
+    </div>
+
+    <!-- Right: Volume & Extra -->
+    <div class="player-right">
+      <button class="control-btn" id="player-lyrics-btn" title="Lyrics">
+        <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none"
+          stroke="currentColor" stroke-width="2">
+          <path d="M9 18V5l12-2v13" />
+          <circle cx="6" cy="18" r="3" />
+          <circle cx="18" cy="16" r="3" />
+        </svg>
+      </button>
+      <button class="control-btn" id="player-queue-btn" title="Queue">
+        <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none"
+          stroke="currentColor" stroke-width="2">
+          <line x1="8" y1="6" x2="21" y2="6"></line>
+          <line x1="8" y1="12" x2="21" y2="12"></line>
+          <line x1="8" y1="18" x2="21" y2="18"></line>
+          <line x1="3" y1="6" x2="3.01" y2="6"></line>
+          <line x1="3" y1="12" x2="3.01" y2="12"></line>
+          <line x1="3" y1="18" x2="3.01" y2="18"></line>
+        </svg>
+      </button>
+      <div class="volume-control">
+        <button class="control-btn" id="volume-btn" title="Volume">
+          <svg class="volume-high" xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24"
+            fill="none" stroke="currentColor" stroke-width="2">
+            <polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"></polygon>
+            <path d="M19.07 4.93a10 10 0 0 1 0 14.14M15.54 8.46a5 5 0 0 1 0 7.07"></path>
+          </svg>
+          <svg class="volume-muted" xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24"
+            fill="none" stroke="currentColor" stroke-width="2" style="display:none;">
+            <polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"></polygon>
+            <line x1="23" y1="9" x2="17" y2="15"></line>
+            <line x1="17" y1="9" x2="23" y2="15"></line>
+          </svg>
+        </button>
+        <div class="volume-slider-container">
+          <div class="volume-bar-bg">
+            <div class="volume-bar-fill" id="volume-fill"></div>
+          </div>
+          <input type="range" class="volume-slider" id="volume-slider" min="0" max="100" value="100" />
+        </div>
+      </div>
+      <button class="control-btn" id="fullscreen-btn" title="Fullscreen">
+        <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none"
+          stroke="currentColor" stroke-width="2">
+          <path d="M8 3H5a2 2 0 0 0-2 2v3m18 0V5a2 2 0 0 0-2-2h-3m0 18h3a2 2 0 0 0 2-2v-3M3 16v3a2 2 0 0 0 2 2h3">
+          </path>
+        </svg>
+      </button>
+    </div>
+  </div>
+
+  <!-- Create Playlist Modal -->
+  <div id="playlist-modal" class="modal" style="display: none;">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h2>Create New Playlist</h2>
+        <button id="modal-close" class="modal-close">×</button>
+      </div>
+      <div class="modal-body">
+        <input id="playlist-name" type="text" placeholder="Playlist name" class="playlist-input" />
+        <textarea id="playlist-desc" placeholder="Add a description..." class="playlist-input"></textarea>
+      </div>
+      <div class="modal-footer">
+        <button id="cancel-btn" class="btn-secondary">Cancel</button>
+        <button id="create-btn" class="btn-primary">Create Playlist</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Playlist View Modal -->
+  <div id="playlist-view-modal" class="modal" style="display: none;">
+    <div class="modal-content large">
+      <div class="modal-header">
+        <h2 id="view-playlist-name">Playlist Name</h2>
+        <button id="view-modal-close" class="modal-close">×</button>
+      </div>
+      <div class="modal-body">
+        <div id="playlist-songs-list" class="playlist-songs-list"></div>
+      </div>
+      <div class="modal-footer">
+        <button id="delete-playlist-btn" class="btn-danger">Delete Playlist</button>
+        <button id="close-view-btn" class="btn-secondary">Close</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Upload Songs Modal -->
+  <div id="upload-modal" class="modal" style="display: none;">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h2>Upload Songs</h2>
+        <button id="upload-modal-close" class="modal-close">×</button>
+      </div>
+      <div class="modal-body">
+        <div class="upload-area" id="upload-area">
+          <input type="file" id="file-input" accept="audio/*" multiple hidden />
+          <div class="upload-icon">
+            <svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 24 24" fill="none"
+              stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
+              <polyline points="17 8 12 3 7 8" />
+              <line x1="12" x2="12" y1="3" y2="15" />
+            </svg>
+          </div>
+          <h3>Drag & Drop your songs here</h3>
+          <p>or click to browse files</p>
+          <p class="upload-hint">Supports MP3, WAV, OGG, FLAC</p>
+        </div>
+
+        <!-- Song Metadata Form -->
+        <div id="metadata-form" class="metadata-form" style="display: none;">
+          <h3 class="metadata-form-title">Song Details</h3>
+          <div class="metadata-field">
+            <label for="song-title-input">Song Title *</label>
+            <input type="text" id="song-title-input" class="metadata-input" placeholder="Enter song title" required />
+          </div>
+          <div class="metadata-field">
+            <label for="movie-name-input">Movie Name</label>
+            <input type="text" id="movie-name-input" class="metadata-input" placeholder="e.g., Leo, Inception" />
+          </div>
+          <div class="metadata-field">
+            <label for="artist-name-input">Artist Name</label>
+            <input type="text" id="artist-name-input" class="metadata-input" placeholder="e.g., AR Rahman, U1" />
+          </div>
+          <div class="metadata-field">
+            <label for="mood-select">Mood</label>
+            <select id="mood-select" class="metadata-select">
+              <option value="">Select mood (optional)</option>
+              <option value="happy">😊 Happy</option>
+              <option value="sad">😢 Sad</option>
+              <option value="energetic">⚡ Energetic</option>
+              <option value="chill">😌 Chill</option>
+              <option value="romantic">💕 Romantic</option>
+              <option value="focus">🎯 Focus</option>
+            </select>
+          </div>
+        </div>
+
+        <div id="upload-progress" class="upload-progress" style="display: none;">
+          <div class="progress-bar">
+            <div class="progress-fill" id="upload-progress-fill"></div>
+          </div>
+          <p id="upload-status">Uploading...</p>
+        </div>
+        <div id="uploaded-files-list" class="uploaded-files-list"></div>
+      </div>
+      <div class="modal-footer">
+        <button id="upload-cancel-btn" class="btn-secondary">Cancel</button>
+        <button id="upload-confirm-btn" class="btn-primary" disabled>Upload Songs</button>
+      </div>
+    </div>
+  </div>
+
+
+  <script type="module" src="/app.js"></script>
+</body>
+
+</html>
