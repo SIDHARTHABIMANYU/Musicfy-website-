@@ -1079,9 +1079,13 @@ const setupChat = () => {
     showTyping();
 
     try {
-      const res = await fetch(`${PROXY_URL}/chat`, {
+      const res = await fetch('http://13.234.225.151:3001/chat', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json', 'x-api-key': 'musicfy-secret-key-2026' },
+        headers: {
+          'Content-Type': 'application/json',
+          'x-api-key': 'musicfy-secret-key-2026'
+        },
+        mode: 'cors',
         body: JSON.stringify({ message }),
         signal: AbortSignal.timeout(30000),
       });
@@ -1089,61 +1093,11 @@ const setupChat = () => {
       if (!res.ok) throw new Error('backend-error');
       const data = await res.json();
       const result = { status: 'unknown_intent', data: {}, message: data.reply || '' };
-      const status = (result.status || '').toLowerCase();
-      const d = result.data || {};
-      const songName = d.song || null;
-      const movieName = d.movie || null;
-      const artistName = d.artist || null;
-      const audio = document.getElementById('song-audio');
-
-      if (status === 'playing') {
-        const query = songName || movieName || artistName || message;
-        const results = findSongByQuery(query);
-        if (results && results.length > 0) {
-          const item = results[0];
-          if (item.type === 'local') { const t = cleanSongTitle(item.data); playSong(item.data, t); addChatMessage(`🎵 Now playing: <strong>${t}</strong>`); }
-          else { playUploadedSong(item.data.id); addChatMessage(`🎵 Now playing: <strong>${item.data.name}</strong>`); }
-        } else {
-          addChatMessage(`❌ Couldn't find "<em>${songName || movieName || query}</em>" in your library.`);
-        }
-      } else if (status === 'searching') {
-        const query = songName || movieName || artistName || '';
-        if (query) {
-          const results = findSongByQuery(query);
-          if (results && results.length > 0) { displaySearchResults(results); showSection('results'); addChatMessage(`🔍 Found <strong>${results.length}</strong> result(s) for "<em>${query}</em>"!`); }
-          else { addChatMessage(`❌ No songs found for "<em>${query}</em>" in your library.`); }
-        } else { addChatMessage('❓ What do you want to search for?'); }
-      } else if (status === 'downloading') {
-        if (currentSong) {
-          addChatMessage(`⬇️ Downloading: <strong>${currentSong.title}</strong>…`);
-          try { await downloadCurrentSong(); addChatMessage(`✅ Download started for: <strong>${currentSong.title}</strong>`); }
-          catch { addChatMessage('❌ Error downloading. Make sure a song is playing.'); }
-        } else { addChatMessage('⚠️ No song is playing. Play a song first, then ask to download!'); }
-      } else if (status === 'paused') {
-        if (audio && !audio.paused) { audio.pause(); addChatMessage(`⏸️ Paused: <strong>${currentSong?.title || 'music'}</strong>`); }
-        else { addChatMessage('⚠️ Nothing is currently playing.'); }
-      } else if (status === 'resumed') {
-        if (audio && audio.paused && audio.src) { audio.play().catch(() => { }); addChatMessage(`▶️ Resumed: <strong>${currentSong?.title || 'music'}</strong>`); }
-        else { addChatMessage('⚠️ Nothing to resume. Play a song first!'); }
-      } else if (status === 'stopped') {
-        if (audio) { audio.pause(); audio.currentTime = 0; } addChatMessage('⏹️ Music stopped.');
-      } else if (status === 'error') {
-        addChatMessage(`⚠️ ${result.message || 'Something went wrong.'}`);
-      } else {
-        addChatMessage(`🤔 I didn't get that. Try:<br>• <em>play [song]</em><br>• <em>search [song]</em><br>• <em>pause / resume / stop</em><br>• <em>download</em>`);
-      }
-    } catch {
+      const status = result.status;
+      addChatMessage(`🤖 ${data.reply}`);
+    } catch (err) {
       hideTyping();
-      // Local fallback when backend is offline
-      const lowerMsg = message.toLowerCase();
-      if (lowerMsg.startsWith('play ')) {
-        const q = message.substring(5).trim(); const r = findSongByQuery(q);
-        if (r.length > 0) { const item = r[0]; if (item.type === 'local') { const t = cleanSongTitle(item.data); playSong(item.data, t); addChatMessage(`🎵 Now playing: <strong>${t}</strong>`); } else { playUploadedSong(item.data.id); addChatMessage(`🎵 Now playing: <strong>${item.data.name}</strong>`); } }
-        else { addChatMessage(`❌ Couldn't find "<em>${q}</em>" in library.`); }
-      } else if (lowerMsg === 'pause') { const a = document.getElementById('song-audio'); if (a && !a.paused) { a.pause(); addChatMessage('⏸️ Paused.'); } else addChatMessage('⚠️ Nothing is playing.'); }
-      else if (lowerMsg === 'resume') { const a = document.getElementById('song-audio'); if (a && a.paused && a.src) { a.play(); addChatMessage('▶️ Resumed!'); } else addChatMessage('⚠️ Nothing to resume.'); }
-      else if (lowerMsg === 'stop') { const a = document.getElementById('song-audio'); if (a) { a.pause(); a.currentTime = 0; } addChatMessage('⏹️ Stopped.'); }
-      else { addChatMessage('⚠️ Backend offline. Try: <em>play [song]</em>, <em>pause</em>, <em>stop</em>, <em>resume</em>.'); }
+      addChatMessage('⚠️ Error connecting to AI: ' + err.message);
     } finally {
       isChatBusy = false;
       if (chatSend) chatSend.disabled = false;
