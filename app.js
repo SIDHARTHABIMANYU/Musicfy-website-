@@ -1,4 +1,4 @@
-const BACKEND_URL = window.BACKEND_URL || 'http://localhost:8000';
+const BACKEND_URL = window.BACKEND_URL || 'http://13.234.225.151:3001';
 import { auth, db, signOut, onAuthStateChanged, doc, setDoc, getDoc, collection, addDoc, getDocs, deleteDoc } from './src/firebase.js';
 
 // State Management
@@ -1078,16 +1078,16 @@ const setupChat = () => {
     showTyping();
 
     try {
-      const res = await fetch('http://localhost:8000/chat', {
+      const res = await fetch('http://13.234.225.151:3001/chat', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: { 'Content-Type': 'application/json', 'x-api-key': 'musicfy-secret-key-2026' },
         body: JSON.stringify({ message }),
         signal: AbortSignal.timeout(30000),
       });
       hideTyping();
       if (!res.ok) throw new Error('backend-error');
       const data = await res.json();
-      const result = data.response || {};
+      const result = { status: 'unknown_intent', data: {}, message: data.reply || '' };
       const status = (result.status || '').toLowerCase();
       const d = result.data || {};
       const songName = d.song || null;
