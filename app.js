@@ -1,4 +1,5 @@
-const BACKEND_URL = window.BACKEND_URL || 'http://13.234.225.151:3001';
+const PROXY_URL = 'http://13.234.225.151:3001';
+const BACKEND_URL = window.BACKEND_URL || PROXY_URL;
 import { auth, db, signOut, onAuthStateChanged, doc, setDoc, getDoc, collection, addDoc, getDocs, deleteDoc } from './src/firebase.js';
 
 // State Management
@@ -1078,7 +1079,7 @@ const setupChat = () => {
     showTyping();
 
     try {
-      const res = await fetch('http://13.234.225.151:3001/chat', {
+      const res = await fetch(`${PROXY_URL}/chat`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json', 'x-api-key': 'musicfy-secret-key-2026' },
         body: JSON.stringify({ message }),
