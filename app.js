@@ -1092,7 +1092,10 @@ const setupChat = () => {
         signal: AbortSignal.timeout(30000),
       });
       hideTyping();
-      if (!res.ok) throw new Error('backend-error');
+      if (!res.ok) {
+        const errData = await res.json().catch(() => ({}));
+        throw new Error(errData.reply || `HTTP ${res.status}`);
+      }
       const data = await res.json();
       const replyText = data.reply || "I've processed your request.";
 
