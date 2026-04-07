@@ -1094,37 +1094,17 @@ const setupChat = () => {
       hideTyping();
       if (!res.ok) throw new Error('backend-error');
       const data = await res.json();
-      const replyText = data.reply || '';
+      const replyText = data.reply || "I've processed your request.";
 
-      // Intent Extraction Logic (Same as chatbot)
-      const userText = replyText.toLowerCase() + " " + message.toLowerCase();
-      let status = 'unknown_intent';
-      let songData = {};
-
-      if (userText.includes('play')) {
-        status = 'playing';
-        const query = message.toLowerCase().replace(/play/i, '').trim();
-        songData = { song: query };
-      } else if (userText.includes('pause')) {
-        status = 'paused';
-      } else if (userText.includes('stop')) {
-        status = 'stopped';
-      } else if (userText.includes('resume')) {
-        status = 'resumed';
-      } else if (userText.includes('search')) {
-        status = 'searching';
-        const query = message.toLowerCase().replace(/search/i, '').trim();
-        songData = { song: query };
-      } else if (userText.includes('download')) {
-        status = 'downloading';
-      }
+      // Use the JSON intent directly from the Smart Backend
+      const aiResponse = {
+        status: data.intent || 'unknown_intent',
+        data: { song: data.song || data.movie || data.artist || '' },
+        message: replyText
+      };
 
       // Execute the action!
-      if (status !== 'unknown_intent') {
-        const aiResponse = { status, data: songData, message: replyText };
-        // We need a small helper to handle these here
-        handleAiAction(aiResponse);
-      }
+      handleAiAction(aiResponse);
 
       addChatMessage(`🤖 ${replyText}`);
     } catch (err) {
