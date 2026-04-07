@@ -1126,7 +1126,7 @@ const setupChat = () => {
     const audio = document.getElementById('song-audio');
     const playPauseBtn = document.getElementById('play-pause-btn');
 
-    if (status === 'playing') {
+    if (status === 'playing' || status === 'play_song') {
       const query = data.song || '';
       const matches = findSongByQuery(query);
       if (matches.length > 0) {
@@ -1134,20 +1134,20 @@ const setupChat = () => {
         if (first.type === 'local') playSong(first.data, cleanSongTitle(first.data));
         else playUploadedSong(first.data.id);
       }
-    } else if (status === 'searching') {
+    } else if (status === 'searching' || status === 'search_song') {
       const query = data.song || '';
       searchInput.value = query;
       handleSearch();
-    } else if (status === 'paused') {
+    } else if (status === 'paused' || status === 'pause_song') {
       if (audio) audio.pause();
-    } else if (status === 'resumed' || status === 'stop_pause') {
+    } else if (status === 'resumed' || status === 'resume_song' || status === 'stop_pause') {
       if (audio) audio.play();
-    } else if (status === 'stopped') {
+    } else if (status === 'stopped' || status === 'stop_song') {
       if (audio) {
         audio.pause();
         audio.currentTime = 0;
       }
-    } else if (status === 'downloading') {
+    } else if (status === 'downloading' || status === 'download_song') {
       downloadCurrentSong().catch(err => console.error('Download error:', err));
     }
   };
