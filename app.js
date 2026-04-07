@@ -1,4 +1,4 @@
-const PROXY_URL = 'http://13.234.225.151:3001';
+const PROXY_URL = 'http://3.108.193.86:3001';
 const BACKEND_URL = window.BACKEND_URL || PROXY_URL;
 import { auth, db, signOut, onAuthStateChanged, doc, setDoc, getDoc, collection, addDoc, getDocs, deleteDoc } from './src/firebase.js';
 
@@ -1079,7 +1079,7 @@ const setupChat = () => {
     showTyping();
 
     try {
-      const res = await fetch('http://13.234.225.151:3001/chat', {
+      const res = await fetch('http://3.108.193.86:3001/chat', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
