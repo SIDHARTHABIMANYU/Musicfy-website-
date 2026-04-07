@@ -149,10 +149,12 @@ const setStatus = (ok, modelName) => {
 
 const loadStatus = async () => {
   try {
-    const res = await fetch(`${BACKEND_URL}/`);
+    const res = await fetch(`${BACKEND_URL}/health`, {
+      headers: { 'x-api-key': 'musicfy-secret-key-2026' }
+    });
     if (!res.ok) throw new Error('offline');
     const data = await res.json();
-    setStatus(true, data.model_name);
+    setStatus(true, data.model);
   } catch (err) {
     setStatus(false);
   }
@@ -1092,9 +1094,39 @@ const setupChat = () => {
       hideTyping();
       if (!res.ok) throw new Error('backend-error');
       const data = await res.json();
-      const result = { status: 'unknown_intent', data: {}, message: data.reply || '' };
-      const status = result.status;
-      addChatMessage(`🤖 ${data.reply}`);
+      const replyText = data.reply || '';
+
+      // Intent Extraction Logic (Same as chatbot)
+      const userText = replyText.toLowerCase() + " " + message.toLowerCase();
+      let status = 'unknown_intent';
+      let songData = {};
+
+      if (userText.includes('play')) {
+        status = 'playing';
+        const query = message.toLowerCase().replace(/play/i, '').trim();
+        songData = { song: query };
+      } else if (userText.includes('pause')) {
+        status = 'paused';
+      } else if (userText.includes('stop')) {
+        status = 'stopped';
+      } else if (userText.includes('resume')) {
+        status = 'resumed';
+      } else if (userText.includes('search')) {
+        status = 'searching';
+        const query = message.toLowerCase().replace(/search/i, '').trim();
+        songData = { song: query };
+      } else if (userText.includes('download')) {
+        status = 'downloading';
+      }
+
+      // Execute the action!
+      if (status !== 'unknown_intent') {
+        const aiResponse = { status, data: songData, message: replyText };
+        // We need a small helper to handle these here
+        handleAiAction(aiResponse);
+      }
+
+      addChatMessage(`🤖 ${replyText}`);
     } catch (err) {
       hideTyping();
       addChatMessage('⚠️ Error connecting to AI: ' + err.message);
@@ -1102,6 +1134,38 @@ const setupChat = () => {
       isChatBusy = false;
       if (chatSend) chatSend.disabled = false;
       if (chatInput) chatInput.focus();
+    }
+  };
+
+  const handleAiAction = (response) => {
+    const status = (response.status || '').toLowerCase();
+    const data = response.data || {};
+    const audio = document.getElementById('song-audio');
+    const playPauseBtn = document.getElementById('play-pause-btn');
+
+    if (status === 'playing') {
+      const query = data.song || '';
+      const matches = findSongByQuery(query);
+      if (matches.length > 0) {
+        const first = matches[0];
+        if (first.type === 'local') playSong(first.data, cleanSongTitle(first.data));
+        else playUploadedSong(first.data.id);
+      }
+    } else if (status === 'searching') {
+      const query = data.song || '';
+      searchInput.value = query;
+      handleSearch();
+    } else if (status === 'paused') {
+      if (audio) audio.pause();
+    } else if (status === 'resumed' || status === 'stop_pause') {
+      if (audio) audio.play();
+    } else if (status === 'stopped') {
+      if (audio) {
+        audio.pause();
+        audio.currentTime = 0;
+      }
+    } else if (status === 'downloading') {
+      downloadCurrentSong().catch(err => console.error('Download error:', err));
     }
   };
 
