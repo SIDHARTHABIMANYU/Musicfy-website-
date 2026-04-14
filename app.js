@@ -1,4 +1,4 @@
-const PROXY_URL = 'http://65.1.2.239:3001';
+const PROXY_URL = 'http://52.66.64.135:3001';
 const BACKEND_URL = window.BACKEND_URL || PROXY_URL;
 import { auth, db, signOut, onAuthStateChanged, doc, setDoc, getDoc, collection, addDoc, getDocs, deleteDoc } from './src/firebase.js';
 
