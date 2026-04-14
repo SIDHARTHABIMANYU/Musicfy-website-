@@ -1081,7 +1081,7 @@ const setupChat = () => {
     showTyping();
 
     try {
-      const res = await fetch('http://3.108.193.86:3001/chat', {
+      const res = await fetch(`${BACKEND_URL}/chat`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
