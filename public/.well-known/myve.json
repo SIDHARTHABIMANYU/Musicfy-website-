@@ -1,0 +1,18 @@
+{
+  "myve_version": "1.0",
+  "site_type": "music_player",
+  "mcp_endpoint": "https://unmischievously-rheotropic-luca.ngrok-free.dev/sse",
+  "intents": [
+    {
+      "action": "music.play",
+      "description": "Play a song by artist name or track title",
+      "params": ["artist", "track", "playlist_id"]
+    },
+    {
+      "action": "music.search",
+      "description": "Search for music",
+      "params": ["query", "genre"]
+    }
+  ],
+  "suggestions_accepted": true
+}
