@@ -150,7 +150,10 @@ const setStatus = (ok, modelName) => {
 const loadStatus = async () => {
   try {
     const res = await fetch(`${BACKEND_URL}/health`, {
-      headers: { 'x-api-key': 'musicfy-secret-key-2026' }
+      headers: { 
+        'x-api-key': 'musicfy-secret-key-2026',
+        'ngrok-skip-browser-warning': 'true'
+      }
     });
     if (!res.ok) throw new Error('offline');
     const data = await res.json();
@@ -1085,7 +1088,8 @@ const setupChat = () => {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          'x-api-key': 'musicfy-secret-key-2026'
+          'x-api-key': 'musicfy-secret-key-2026',
+          'ngrok-skip-browser-warning': 'true'
         },
         mode: 'cors',
         body: JSON.stringify({ message }),
