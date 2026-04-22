@@ -2014,6 +2014,7 @@ const init = async () => {
   setupResizableSidebars();
   setupLogoutButton();
   setupUploadModal();
+  setupMcpPolling();  // ← ADD THIS LINE
 
   // Show default sections
   showSection('default');
@@ -2027,6 +2028,60 @@ const setupLogoutButton = () => {
   if (logoutBtn) {
     logoutBtn.addEventListener('click', handleLogout);
   }
+};
+
+// =====================================================
+// MCP COMMAND POLLING — Claude controls the website
+// =====================================================
+
+const setupMcpPolling = () => {
+  setInterval(async () => {
+    try {
+      const res = await fetch(`${BACKEND_URL}/mcp-command`, {
+        headers: { 'ngrok-skip-browser-warning': 'true' }
+      });
+      const data = await res.json();
+      if (data.command) {
+        console.log('🎵 MCP Command from Claude:', data.command);
+
+        if (data.command.action === 'play') {
+          // Search for the song and play it
+          const matches = findSongByQuery(data.command.song);
+          if (matches.length > 0) {
+            const first = matches[0];
+            if (first.type === 'local') {
+              playSong(first.data, cleanSongTitle(first.data));
+            } else {
+              playUploadedSong(first.data.id);
+            }
+          } else {
+            // If not found locally, try searching
+            if (searchInput) {
+              searchInput.value = data.command.song;
+              handleSearch();
+            }
+          }
+
+        } else if (data.command.action === 'pause') {
+          const audio = document.getElementById('song-audio');
+          if (audio) audio.pause();
+
+        } else if (data.command.action === 'resume' || data.command.action === 'stop') {
+          const audio = document.getElementById('song-audio');
+          if (audio) audio.play();
+
+        } else if (data.command.action === 'search') {
+          if (searchInput) {
+            searchInput.value = data.command.query;
+            handleSearch();
+          }
+        }
+      }
+    } catch (e) {
+      // Silent fail — backend might be temporarily unavailable
+    }
+  }, 2000);
+  console.log('🔄 MCP polling started');
 };
 
 // Start the app
