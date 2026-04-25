@@ -1114,6 +1114,38 @@ const setupChat = () => {
       handleAiAction(aiResponse);
 
       addChatMessage(`🤖 ${replyText}`);
+
+      if (data.suggestions && data.suggestions.length > 0) {
+        data.suggestions.forEach(suggestion => {
+          const suggDiv = document.createElement('div');
+          suggDiv.style.cssText = `
+            background: linear-gradient(135deg, rgba(156,39,176,0.15), rgba(233,30,99,0.15));
+            border: 1px solid rgba(156,39,176,0.3);
+            border-radius: 12px;
+            padding: 12px 16px;
+            margin: 6px 0;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 10px;
+          `;
+          suggDiv.innerHTML = `
+            <span style="color:#e0e0e0;font-size:13px;">${suggestion.display_text}</span>
+            <button onclick="window.open('${suggestion.url}','_blank')" style="
+              background: linear-gradient(135deg, #9c27b0, #e91e63);
+              border: none;
+              border-radius: 8px;
+              color: white;
+              padding: 6px 12px;
+              cursor: pointer;
+              font-size: 12px;
+              white-space: nowrap;
+            ">Try It →</button>
+          `;
+          chatMessages.appendChild(suggDiv);
+          chatMessages.scrollTop = chatMessages.scrollHeight;
+        });
+      }
     } catch (err) {
       hideTyping();
       addChatMessage('⚠️ Error connecting to AI: ' + err.message);
