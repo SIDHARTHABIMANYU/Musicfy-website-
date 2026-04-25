@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Musicfy Analytics Dashboard</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body { background: #0a0a0f; color: #e0e0e0; font-family: 'Segoe UI', sans-serif; padding: 20px; }
+  h1 { text-align: center; background: linear-gradient(135deg, #9c27b0, #e91e63); -webkit-background-clip: text; -webkit-text-fill-color: transparent; margin-bottom: 30px; font-size: 2rem; }
+  .cards { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 20px; margin-bottom: 30px; }
+  .card { background: rgba(156,39,176,0.1); border: 1px solid rgba(156,39,176,0.3); border-radius: 16px; padding: 20px; text-align: center; }
+  .card h2 { font-size: 2.5rem; color: #e91e63; }
+  .card p { color: #999; margin-top: 5px; }
+  .section { background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.1); border-radius: 16px; padding: 20px; margin-bottom: 20px; }
+  .section h3 { color: #9c27b0; margin-bottom: 15px; font-size: 1.1rem; }
+  .intent-bar { display: flex; align-items: center; gap: 10px; margin-bottom: 10px; }
+  .intent-label { width: 100px; color: #ccc; font-size: 13px; }
+  .bar { height: 24px; background: linear-gradient(135deg, #9c27b0, #e91e63); border-radius: 6px; min-width: 4px; transition: width 0.5s; }
+  .bar-count { color: #e91e63; font-weight: bold; font-size: 13px; }
+  .feed-item { background: rgba(255,255,255,0.03); border-radius: 10px; padding: 12px; margin-bottom: 8px; display: flex; justify-content: space-between; align-items: center; }
+  .feed-song { color: #e0e0e0; font-size: 14px; }
+  .feed-intent { background: rgba(156,39,176,0.2); color: #9c27b0; padding: 3px 10px; border-radius: 20px; font-size: 12px; }
+  .feed-time { color: #666; font-size: 12px; }
+  .refresh-btn { display: block; margin: 0 auto 20px; background: linear-gradient(135deg, #9c27b0, #e91e63); border: none; color: white; padding: 10px 30px; border-radius: 10px; cursor: pointer; font-size: 14px; }
+  .loading { text-align: center; color: #666; padding: 20px; }
+</style>
+</head>
+<body>
+<h1>🎵 Musicfy Analytics</h1>
+<button class="refresh-btn" onclick="loadData()">🔄 Refresh</button>
+<div class="cards">
+  <div class="card"><h2 id="total">-</h2><p>Total Intents Today</p></div>
+  <div class="card"><h2 id="plays">-</h2><p>Songs Played</p></div>
+  <div class="card"><h2 id="searches">-</h2><p>Searches</p></div>
+  <div class="card"><h2 id="suggestions">-</h2><p>Suggestions Shown</p></div>
+</div>
+<div class="section">
+  <h3>📊 Intent Breakdown</h3>
+  <div id="intent-bars"><div class="loading">Loading...</div></div>
+</div>
+<div class="section">
+  <h3>🕐 Recent Activity</h3>
+  <div id="feed"><div class="loading">Loading...</div></div>
+</div>
+<script>
+const BACKEND = 'https://unmischievously-rheotropic-luca.ngrok-free.dev';
+
+async function loadData() {
+  try {
+    const res = await fetch(BACKEND + '/analytics', {
+      headers: { 'ngrok-skip-browser-warning': 'true' }
+    });
+    const data = await res.json();
+    
+    document.getElementById('total').textContent = data.total || 0;
+    document.getElementById('plays').textContent = data.intents['playing'] || 0;
+    document.getElementById('searches').textContent = data.intents['searching'] || 0;
+    document.getElementById('suggestions').textContent = 
+      (data.intents['playing'] || 0) * 2 + (data.intents['searching'] || 0) * 2;
+
+    const maxVal = Math.max(...Object.values(data.intents || {1:1}));
+    const barsHtml = Object.entries(data.intents || {}).map(([intent, count]) => `
+      <div class="intent-bar">
+        <span class="intent-label">${intent}</span>
+        <div class="bar" style="width:${Math.max((count/maxVal)*300, 4)}px"></div>
+        <span class="bar-count">${count}</span>
+      </div>
+    `).join('');
+    document.getElementById('intent-bars').innerHTML = barsHtml || '<p style="color:#666">No data yet</p>';
+
+    const feedHtml = (data.recent || []).map(item => `
+      <div class="feed-item">
+        <span class="feed-song">🎵 ${item.user_message || '-'}</span>
+        <span class="feed-intent">${item.intent_action || 'unknown'}</span>
+        <span class="feed-time">${new Date(item.timestamp).toLocaleTimeString()}</span>
+      </div>
+    `).join('');
+    document.getElementById('feed').innerHTML = feedHtml || '<p style="color:#666">No activity yet</p>';
+
+  } catch(e) {
+    document.getElementById('feed').innerHTML = '<p style="color:#e91e63">Error: ' + e.message + '</p>';
+  }
+}
+
+loadData();
+setInterval(loadData, 30000);
+</script>
+</body>
+</html>
