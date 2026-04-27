@@ -1049,6 +1049,7 @@ const setupChat = () => {
     chatMessages.appendChild(msgDiv);
     chatMessages.scrollTop = chatMessages.scrollHeight;
   };
+  window.addChatMessage = addChatMessage; // Make global for bookConcert
 
   // ── Typing Indicator ──
   const showTyping = () => {
@@ -1117,33 +1118,58 @@ const setupChat = () => {
 
       if (data.suggestions && data.suggestions.length > 0) {
         data.suggestions.forEach(suggestion => {
-          const suggDiv = document.createElement('div');
-          suggDiv.style.cssText = `
-            background: linear-gradient(135deg, rgba(156,39,176,0.15), rgba(233,30,99,0.15));
-            border: 1px solid rgba(156,39,176,0.3);
-            border-radius: 12px;
-            padding: 12px 16px;
-            margin: 6px 0;
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            gap: 10px;
-          `;
-          suggDiv.innerHTML = `
-            <span style="color:#e0e0e0;font-size:13px;">${suggestion.display_text}</span>
-            <button onclick="window.open('${suggestion.url}','_blank')" style="
-              background: linear-gradient(135deg, #9c27b0, #e91e63);
-              border: none;
-              border-radius: 8px;
-              color: white;
-              padding: 6px 12px;
-              cursor: pointer;
-              font-size: 12px;
-              white-space: nowrap;
-            ">Try It →</button>
-          `;
-          chatMessages.appendChild(suggDiv);
-          chatMessages.scrollTop = chatMessages.scrollHeight;
+          if (suggestion.action === 'book_concert') {
+            const card = document.createElement("div");
+            card.style.cssText = `
+              background: linear-gradient(135deg, rgba(108,63,199,0.1), rgba(233,30,140,0.1));
+              border: 1px solid rgba(108,63,199,0.4);
+              border-radius: 14px; padding: 14px 18px; margin: 8px 0;
+            `;
+            card.innerHTML = `
+              <div style="color:#e0e0e0;font-size:13px;margin-bottom:10px;">
+                🎫 ${suggestion.display_text}
+              </div>
+              <div style="color:#aaa;font-size:11px;margin-bottom:10px;font-family:monospace;white-space:pre-wrap;">
+                ${suggestion.details ? suggestion.details.substring(0, 300) + "..." : ""}
+              </div>
+              <div style="display:flex;gap:8px;">
+                <input id="booking-email-${suggestion.artist}" type="email"
+                  placeholder="your@email.com" style="
+                    flex:1; background:rgba(255,255,255,0.1); border:1px solid rgba(255,255,255,0.2);
+                    border-radius:8px; color:white; padding:6px 10px; font-size:12px;
+                "/>
+                <button onclick="bookConcert('${suggestion.artist}')" style="
+                  background:linear-gradient(135deg,#6C3FC7,#E91E8C); border:none;
+                  border-radius:8px; color:white; padding:6px 14px; cursor:pointer; font-size:12px;
+                ">Book Now →</button>
+              </div>
+            `;
+            chatMessages.appendChild(card);
+            chatMessages.scrollTop = chatMessages.scrollHeight;
+          } else {
+            const suggDiv = document.createElement('div');
+            suggDiv.style.cssText = `
+              background: linear-gradient(135deg, rgba(156,39,176,0.15), rgba(233,30,99,0.15));
+              border: 1px solid rgba(156,39,176,0.3);
+              border-radius: 12px;
+              padding: 12px 16px;
+              margin: 6px 0;
+              display: flex;
+              align-items: center;
+              justify-content: space-between;
+              gap: 10px;
+            `;
+            suggDiv.innerHTML = `
+              <span style="color:#e0e0e0;font-size:13px;">${suggestion.display_text}</span>
+              <button onclick="window.open('${suggestion.url}','_blank')" style="
+                background: linear-gradient(135deg, #9c27b0, #e91e63);
+                border: none; border-radius: 8px; color: white;
+                padding: 6px 12px; cursor: pointer; font-size: 12px; white-space: nowrap;
+              ">Try It →</button>
+            `;
+            chatMessages.appendChild(suggDiv);
+            chatMessages.scrollTop = chatMessages.scrollHeight;
+          }
         });
       }
     } catch (err) {
@@ -2115,6 +2141,32 @@ const setupMcpPolling = () => {
   }, 2000);
   console.log('🔄 MCP polling started');
 };
+
+async function bookConcert(artist) {
+  const emailInput = document.getElementById(`booking-email-${artist}`);
+  const email = emailInput ? emailInput.value.trim() : "";
+  if (!email) {
+    addChatMessage("🤖 Please enter your email address to complete the booking.");
+    return;
+  }
+  addChatMessage("🤖 Checking available concerts and completing your booking...");
+  try {
+    const resp = await fetch(`${BACKEND_URL}/route-booking`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'ngrok-skip-browser-warning': 'true' },
+      body: JSON.stringify({ artist, user_email: email, quantity: 1 })
+    });
+    const data = await resp.json();
+    if (data.success) {
+      addChatMessage(`🎫 Booking confirmed! ${data.data}`);
+    } else {
+      addChatMessage("🤖 Sorry, booking failed. Please try on Festora directly.");
+    }
+  } catch(e) {
+    addChatMessage("🤖 Connection error. Please try again.");
+  }
+}
+window.bookConcert = bookConcert;
 
 // Start the app
 init();
