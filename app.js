@@ -1189,6 +1189,21 @@ const setupChat = () => {
     const playPauseBtn = document.getElementById('play-pause-btn');
 
     if (status === 'playing' || status === 'play_song') {
+      if (data.song === "random" || data.song === "") {
+        const allSongs = [
+          ...songs.map(s => ({ type: 'local', data: s })),
+          ...uploadedSongs.map(s => ({ type: 'uploaded', data: s }))
+        ];
+        if (allSongs.length > 0) {
+          const randomSong = allSongs[Math.floor(Math.random() * allSongs.length)];
+          if (randomSong.type === 'local') {
+            playSong(randomSong.data, cleanSongTitle(randomSong.data));
+          } else {
+            playUploadedSong(randomSong.data.id);
+          }
+        }
+        return;
+      }
       const query = data.song || '';
       const matches = findSongByQuery(query);
       if (matches.length > 0) {
