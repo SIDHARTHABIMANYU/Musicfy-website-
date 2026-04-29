@@ -11,7 +11,7 @@ window.onerror = function(msg, url, lineNo, columnNo, error) {
   return false;
 };
 
-import { auth, db, signOut, onAuthStateChanged, doc, setDoc, getDoc, collection, addDoc, getDocs, deleteDoc } from './src/firebase.js';
+import { auth, db, signOut, onAuthStateChanged, doc, setDoc, getDoc, collection, addDoc, getDocs, deleteDoc } from '/src/firebase.js';
 
 // State Management
 let songs = [];
