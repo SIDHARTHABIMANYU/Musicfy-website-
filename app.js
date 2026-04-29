@@ -79,6 +79,11 @@ const updateUserUI = (user) => {
     if (userInfoEmail) userInfoEmail.textContent = user.email;
 
     updateGreeting(userName);
+  } else {
+    if (avatar) avatar.textContent = 'G';
+    if (userInfoName) userInfoName.textContent = 'Guest';
+    if (userInfoEmail) userInfoEmail.innerHTML = '<a href="/login.html" style="color: #e91e63; text-decoration: underline;">Sign In</a>';
+    updateGreeting('Guest');
   }
 };
 
@@ -131,14 +136,14 @@ const setupAuthListener = () => {
     } else {
       console.log('↪️ Not logged in, checking redirect...');
       const path = window.location.pathname.toLowerCase();
-      // Stop redirect if we are on ANY login-related path to break loops
-      const isLoginPage = path.includes('login.html') || path.includes('/login/') || path.endsWith('/login');
+      // If we are at the root or a subpath that ISN'T the login page, redirect
+      const isActualLoginPage = path.includes('login.html');
       
-      if (!isLoginPage) {
+      if (!isActualLoginPage) {
         console.log('↪️ Redirecting to /login.html');
         window.location.href = '/login.html';
       } else {
-        console.log('🏠 Already on a login-friendly path, showing app shell.');
+        console.log('🏠 Already on login.html, clearing spinner.');
         if (loadingScreen) {
           loadingScreen.style.display = 'none';
           document.body.classList.remove('loading-active');
