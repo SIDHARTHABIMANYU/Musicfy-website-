@@ -1,5 +1,16 @@
 const PROXY_URL = 'https://unmischievously-rheotropic-luca.ngrok-free.dev';
 const BACKEND_URL = window.BACKEND_URL || PROXY_URL;
+
+// Global Error Handler
+window.onerror = function(msg, url, lineNo, columnNo, error) {
+  console.error('GLOBAL ERROR:', msg, 'at', url, 'line', lineNo);
+  const loadingText = document.querySelector('#auth-loading p');
+  if (loadingText) {
+    loadingText.innerHTML = `<span style="color:#ff4757">JS Error: ${msg}</span><br><button onclick="location.reload()" style="background:#e91e63;border:none;color:white;padding:5px 10px;border-radius:5px;margin-top:10px;">Retry</button>`;
+  }
+  return false;
+};
+
 import { auth, db, signOut, onAuthStateChanged, doc, setDoc, getDoc, collection, addDoc, getDocs, deleteDoc } from './src/firebase.js';
 
 // State Management
@@ -81,33 +92,52 @@ const handleLogout = async () => {
 };
 
 const setupAuthListener = () => {
+  console.log('🔐 Setting up Auth Listener...');
   const loadingScreen = document.getElementById('auth-loading');
 
-  // Safety timeout: Always hide loading screen after 5 seconds
+  // Safety timeout: Always hide loading screen after 8 seconds
   const safetyTimeout = setTimeout(() => {
     if (loadingScreen && loadingScreen.style.display !== 'none') {
-      console.warn('Auth check taking long... hiding loading screen anyway.');
+      console.warn('⚠️ Auth check taking too long... force hiding loading screen.');
       loadingScreen.style.opacity = '0';
-      setTimeout(() => loadingScreen.style.display = 'none', 300);
+      setTimeout(() => {
+        loadingScreen.style.display = 'none';
+        document.body.classList.remove('loading-active');
+      }, 300);
     }
-  }, 5000);
+  }, 8000);
 
   onAuthStateChanged(auth, (user) => {
+    console.log('👤 Auth State Changed:', user ? 'Logged In' : 'Logged Out');
     clearTimeout(safetyTimeout);
+    
     if (user) {
       currentUser = user;
       updateUserUI(user);
 
       if (loadingScreen) {
         loadingScreen.style.opacity = '0';
-        setTimeout(() => loadingScreen.style.display = 'none', 300);
+        setTimeout(() => {
+          loadingScreen.style.display = 'none';
+          document.body.classList.remove('loading-active');
+        }, 300);
       }
 
+      // Initial data load when user is confirmed
       loadPlaylists();
       loadHistory();
-
     } else {
-      window.location.href = '/login.html';
+      console.log('↪️ Not logged in, checking if redirect needed...');
+      const isLoginPage = window.location.pathname.includes('login.html') || window.location.pathname.includes('/login/');
+      if (!isLoginPage) {
+        console.log('↪️ Redirecting to login.html');
+        window.location.href = '/login.html';
+      } else {
+        console.log('🏠 Already on login page, hiding spinner.');
+        if (loadingScreen) {
+          loadingScreen.style.display = 'none';
+        }
+      }
     }
   });
 };
@@ -2053,19 +2083,18 @@ const setupUploadModal = () => {
 // =====================================================
 
 const init = async () => {
-  console.log('🎵 Musicfy starting...');
+  console.log('🎵 Musicfy starting initialization...');
   const loadingScreen = document.getElementById('auth-loading');
 
   try {
-    // Setup auth listener first
+    // Setup auth listener first - this handles the login redirect
     setupAuthListener();
 
-    // Check authentication
-    const isAuthenticated = await checkAuth();
-
-    if (!isAuthenticated) {
-      console.log('❌ Not authenticated, redirecting to login...');
-      return; // Will redirect to login
+    // Give Firebase a moment or check if we are on login page
+    const isLoginPage = window.location.pathname.includes('login.html') || window.location.pathname.includes('/login/');
+    if (isLoginPage) {
+      console.log('🏠 In login context, stopping main init.');
+      return;
     }
 
     // Initialize upload database
