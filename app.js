@@ -95,17 +95,17 @@ const setupAuthListener = () => {
   console.log('🔐 Setting up Auth Listener...');
   const loadingScreen = document.getElementById('auth-loading');
 
-  // Safety timeout: Always hide loading screen after 8 seconds
+  // Safety timeout: Always hide loading screen after 5 seconds
   const safetyTimeout = setTimeout(() => {
-    if (loadingScreen && loadingScreen.style.display !== 'none') {
-      console.warn('⚠️ Auth check taking too long... force hiding loading screen.');
+    console.warn('⚠️ Force hiding loading screen due to timeout.');
+    if (loadingScreen) {
       loadingScreen.style.opacity = '0';
       setTimeout(() => {
         loadingScreen.style.display = 'none';
         document.body.classList.remove('loading-active');
       }, 300);
     }
-  }, 8000);
+  }, 5000);
 
   onAuthStateChanged(auth, (user) => {
     console.log('👤 Auth State Changed:', user ? 'Logged In' : 'Logged Out');
@@ -127,14 +127,16 @@ const setupAuthListener = () => {
       loadPlaylists();
       loadHistory();
     } else {
-      console.log('↪️ Not logged in, checking if redirect needed...');
-      // Only redirect if NOT on the actual login.html page
-      const isActualLoginPage = window.location.pathname.includes('login.html');
-      if (!isActualLoginPage) {
-        console.log('↪️ Redirecting to login.html');
+      console.log('↪️ Not logged in, checking redirect...');
+      // Be very careful with redirects to avoid loops
+      const path = window.location.pathname.toLowerCase();
+      const isLoginPage = path.includes('login.html') || path.endsWith('/login') || path.endsWith('/login/');
+      
+      if (!isLoginPage) {
+        console.log('↪️ Redirecting to /login.html');
         window.location.href = '/login.html';
       } else {
-        console.log('🏠 On login.html, hiding spinner.');
+        console.log('🏠 Already on a login path, clearing spinner.');
         if (loadingScreen) {
           loadingScreen.style.display = 'none';
         }
