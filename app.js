@@ -95,17 +95,19 @@ const setupAuthListener = () => {
   console.log('🔐 Setting up Auth Listener...');
   const loadingScreen = document.getElementById('auth-loading');
 
-  // Safety timeout: Always hide loading screen after 5 seconds
+  // Safety timeout: Always hide loading screen after 6 seconds
   const safetyTimeout = setTimeout(() => {
-    console.warn('⚠️ Force hiding loading screen due to timeout.');
-    if (loadingScreen) {
-      loadingScreen.style.opacity = '0';
-      setTimeout(() => {
-        loadingScreen.style.display = 'none';
-        document.body.classList.remove('loading-active');
-      }, 300);
+    console.warn('⚠️ Force showing emergency options due to timeout.');
+    const loadingText = document.querySelector('#auth-loading p');
+    if (loadingText) {
+      loadingText.innerHTML = `
+        <div style="margin-top:20px; display:flex; flex-direction:column; gap:10px; align-items:center;">
+          <button onclick="window.location.href='/login.html'" style="background:linear-gradient(135deg,#6c3fc7,#e91e8c); border:none; color:white; padding:10px 20px; border-radius:10px; cursor:pointer; font-weight:600;">Go to Login Page →</button>
+          <button onclick="document.getElementById('auth-loading').style.display='none'" style="background:rgba(255,255,255,0.1); border:1px solid rgba(255,255,255,0.2); color:white; padding:8px 16px; border-radius:10px; cursor:pointer; font-size:12px;">Enter as Guest</button>
+        </div>
+      `;
     }
-  }, 5000);
+  }, 6000);
 
   onAuthStateChanged(auth, (user) => {
     console.log('👤 Auth State Changed:', user ? 'Logged In' : 'Logged Out');
@@ -128,16 +130,18 @@ const setupAuthListener = () => {
       loadHistory();
     } else {
       console.log('↪️ Not logged in, checking redirect...');
-      // Only skip redirect if we are actually on the login.html page
-      const isActualLoginPage = window.location.pathname.toLowerCase().includes('login.html');
+      const path = window.location.pathname.toLowerCase();
+      // Stop redirect if we are on ANY login-related path to break loops
+      const isLoginPage = path.includes('login.html') || path.includes('/login/') || path.endsWith('/login');
       
-      if (!isActualLoginPage) {
+      if (!isLoginPage) {
         console.log('↪️ Redirecting to /login.html');
         window.location.href = '/login.html';
       } else {
-        console.log('🏠 On login.html, hiding spinner.');
+        console.log('🏠 Already on a login-friendly path, showing app shell.');
         if (loadingScreen) {
           loadingScreen.style.display = 'none';
+          document.body.classList.remove('loading-active');
         }
       }
     }
