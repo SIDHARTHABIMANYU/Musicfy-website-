@@ -128,15 +128,14 @@ const setupAuthListener = () => {
       loadHistory();
     } else {
       console.log('↪️ Not logged in, checking redirect...');
-      // Be very careful with redirects to avoid loops
-      const path = window.location.pathname.toLowerCase();
-      const isLoginPage = path.includes('login.html') || path.endsWith('/login') || path.endsWith('/login/');
+      // Only skip redirect if we are actually on the login.html page
+      const isActualLoginPage = window.location.pathname.toLowerCase().includes('login.html');
       
-      if (!isLoginPage) {
+      if (!isActualLoginPage) {
         console.log('↪️ Redirecting to /login.html');
         window.location.href = '/login.html';
       } else {
-        console.log('🏠 Already on a login path, clearing spinner.');
+        console.log('🏠 On login.html, hiding spinner.');
         if (loadingScreen) {
           loadingScreen.style.display = 'none';
         }
