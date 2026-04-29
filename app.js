@@ -1034,6 +1034,9 @@ const setupChat = () => {
   }
 
   const addChatMessage = (message, isUser = false) => {
+    const chatMessages = document.getElementById('chat-messages');
+    if (!chatMessages) return;
+    
     const msgDiv = document.createElement('div');
     msgDiv.style.cssText = `
       background: ${isUser ? 'linear-gradient(135deg, #9c27b0, #e91e63)' : 'rgba(255, 255, 255, 0.05)'};
@@ -1043,13 +1046,14 @@ const setupChat = () => {
       font-size: 13px;
       align-self: ${isUser ? 'flex-end' : 'flex-start'};
       max-width: 85%;
+      margin-bottom: 8px;
       font-weight: ${isUser ? '600' : '400'};
     `;
     msgDiv.textContent = message;
     chatMessages.appendChild(msgDiv);
     chatMessages.scrollTop = chatMessages.scrollHeight;
   };
-  window.addChatMessage = addChatMessage; // Make global for bookConcert
+  window.addChatMessage = addChatMessage; // Make global for other functions
 
   // ── Typing Indicator ──
   const showTyping = () => {
@@ -1174,7 +1178,8 @@ const setupChat = () => {
       }
     } catch (err) {
       hideTyping();
-      addChatMessage('⚠️ Error connecting to AI: ' + err.message);
+      if (window.addChatMessage) window.addChatMessage('⚠️ Error connecting to AI: ' + err.message);
+      else console.error('Chat error:', err);
     } finally {
       isChatBusy = false;
       if (chatSend) chatSend.disabled = false;
@@ -2049,50 +2054,62 @@ const setupUploadModal = () => {
 
 const init = async () => {
   console.log('🎵 Musicfy starting...');
+  const loadingScreen = document.getElementById('auth-loading');
 
-  // Setup auth listener first
-  setupAuthListener();
-
-  // Check authentication
-  const isAuthenticated = await checkAuth();
-
-  if (!isAuthenticated) {
-    console.log('❌ Not authenticated, redirecting to login...');
-    return; // Will redirect to login
-  }
-
-  // Initialize upload database
   try {
-    await initUploadDB();
-    await loadUploadedSongs();
+    // Setup auth listener first
+    setupAuthListener();
+
+    // Check authentication
+    const isAuthenticated = await checkAuth();
+
+    if (!isAuthenticated) {
+      console.log('❌ Not authenticated, redirecting to login...');
+      return; // Will redirect to login
+    }
+
+    // Initialize upload database
+    try {
+      await initUploadDB();
+      await loadUploadedSongs();
+    } catch (error) {
+      console.error('Failed to initialize upload DB:', error);
+    }
+
+    // Continue with initialization
+    await Promise.allSettled([
+      loadSongs(),
+      loadPlaylists(),
+      loadHistory()
+    ]);
+    
+    loadStatus();
+
+    setupEventListeners();
+    setupPlayerControls();
+    setupLeftNavigation();
+    setupRightNavigation();
+    setupModals();
+    setupChat();
+    setupAutoPlaylists();
+    setupAiDj();
+    setupMoodButtons();
+    setupResizableSidebars();
+    setupLogoutButton();
+    setupUploadModal();
+    setupMcpPolling();
+
+    // Show default sections
+    showSection('default');
+
+    console.log('🎵 Musicfy initialized!');
   } catch (error) {
-    console.error('Failed to initialize upload DB:', error);
+    console.error('CRITICAL INITIALIZATION ERROR:', error);
+    if (loadingScreen) {
+      const p = loadingScreen.querySelector('p');
+      if (p) p.innerHTML = `Error: ${error.message}<br><button onclick="location.reload()" style="background:#e91e63;border:none;color:white;padding:8px 16px;border-radius:8px;margin-top:10px;cursor:pointer;">Retry</button>`;
+    }
   }
-
-  // Continue with initialization
-  await loadSongs();
-  await loadPlaylists();
-  await loadHistory();
-  loadStatus();
-
-  setupEventListeners();
-  setupPlayerControls();
-  setupLeftNavigation();
-  setupRightNavigation();
-  setupModals();
-  setupChat();
-  setupAutoPlaylists();
-  setupAiDj();
-  setupMoodButtons();
-  setupResizableSidebars();
-  setupLogoutButton();
-  setupUploadModal();
-  setupMcpPolling();  // ← ADD THIS LINE
-
-  // Show default sections
-  showSection('default');
-
-  console.log('🎵 Musicfy initialized!');
 };
 
 // Setup logout button
@@ -2161,10 +2178,10 @@ async function bookConcert(artist) {
   const emailInput = document.getElementById(`booking-email-${artist}`);
   const email = emailInput ? emailInput.value.trim() : "";
   if (!email) {
-    addChatMessage("🤖 Please enter your email address to complete the booking.");
+    if (window.addChatMessage) window.addChatMessage("🤖 Please enter your email address to complete the booking.");
     return;
   }
-  addChatMessage("🤖 Checking available concerts and completing your booking...");
+  if (window.addChatMessage) window.addChatMessage("🤖 Checking available concerts and completing your booking...");
   try {
     const resp = await fetch(`${BACKEND_URL}/route-booking`, {
       method: 'POST',
