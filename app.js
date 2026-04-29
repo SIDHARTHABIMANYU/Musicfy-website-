@@ -128,12 +128,13 @@ const setupAuthListener = () => {
       loadHistory();
     } else {
       console.log('↪️ Not logged in, checking if redirect needed...');
-      const isLoginPage = window.location.pathname.includes('login.html') || window.location.pathname.includes('/login/');
-      if (!isLoginPage) {
+      // Only redirect if NOT on the actual login.html page
+      const isActualLoginPage = window.location.pathname.includes('login.html');
+      if (!isActualLoginPage) {
         console.log('↪️ Redirecting to login.html');
         window.location.href = '/login.html';
       } else {
-        console.log('🏠 Already on login page, hiding spinner.');
+        console.log('🏠 On login.html, hiding spinner.');
         if (loadingScreen) {
           loadingScreen.style.display = 'none';
         }
@@ -2089,13 +2090,6 @@ const init = async () => {
   try {
     // Setup auth listener first - this handles the login redirect
     setupAuthListener();
-
-    // Give Firebase a moment or check if we are on login page
-    const isLoginPage = window.location.pathname.includes('login.html') || window.location.pathname.includes('/login/');
-    if (isLoginPage) {
-      console.log('🏠 In login context, stopping main init.');
-      return;
-    }
 
     // Initialize upload database
     try {
