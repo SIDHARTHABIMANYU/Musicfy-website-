@@ -2168,23 +2168,36 @@ const setupMcpPolling = () => {
         console.log('🎵 MCP Command from Claude:', data.command);
 
         if (data.command.action === 'play') {
-          // Search for the song and play it
-          const matches = findSongByQuery(data.command.song);
-          if (matches.length > 0) {
-            const first = matches[0];
-            if (first.type === 'local') {
-              playSong(first.data, cleanSongTitle(first.data));
-            } else {
-              playUploadedSong(first.data.id);
+          const songName = data.command.song;
+          if (!songName || songName === 'random' || songName === '') {
+            const allSongs = [
+              ...songs.map(s => ({type: 'local', data: s})),
+              ...uploadedSongs.map(s => ({type: 'uploaded', data: s}))
+            ];
+            if (allSongs.length > 0) {
+              const randomSong = allSongs[Math.floor(Math.random() * allSongs.length)];
+              if (randomSong.type === 'local') {
+                playSong(randomSong.data, cleanSongTitle(randomSong.data));
+              } else {
+                playUploadedSong(randomSong.data.id);
+              }
             }
           } else {
-            // If not found locally, try searching
-            if (searchInput) {
-              searchInput.value = data.command.song;
-              handleSearch();
+            const matches = findSongByQuery ? findSongByQuery(songName) : [];
+            if (matches && matches.length > 0) {
+              const first = matches[0];
+              if (first.type === 'local') {
+                playSong(first.data, cleanSongTitle(first.data));
+              } else {
+                playUploadedSong(first.data.id);
+              }
+            } else {
+              if (searchInput) {
+                searchInput.value = songName;
+                handleSearch && handleSearch();
+              }
             }
           }
-
         } else if (data.command.action === 'pause') {
           const audio = document.getElementById('song-audio');
           if (audio) audio.pause();
