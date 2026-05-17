@@ -1165,6 +1165,7 @@ const setupChat = () => {
         data.suggestions.forEach(suggestion => {
           if (suggestion.action === 'book_concert') {
             const card = document.createElement("div");
+            card.className = "concert-booking-card";
             card.style.cssText = `
               background: linear-gradient(135deg, rgba(108,63,199,0.1), rgba(233,30,140,0.1));
               border: 1px solid rgba(108,63,199,0.4);
@@ -1174,8 +1175,8 @@ const setupChat = () => {
               <div style="color:#e0e0e0;font-size:13px;margin-bottom:10px;">
                 🎫 ${suggestion.display_text}
               </div>
-              <div style="color:#aaa;font-size:11px;margin-bottom:10px;font-family:monospace;white-space:pre-wrap;">
-                ${suggestion.details ? suggestion.details.substring(0, 300) + "..." : ""}
+              <div class="concert-details" style="color:#aaa;font-size:11px;margin-bottom:10px;font-family:monospace;white-space:pre-wrap;">
+                ${suggestion.details ? suggestion.details : ""}
               </div>
               <div style="display:flex;gap:8px;">
                 <input id="booking-email-${suggestion.artist}" type="email"
@@ -1183,7 +1184,7 @@ const setupChat = () => {
                     flex:1; background:rgba(255,255,255,0.1); border:1px solid rgba(255,255,255,0.2);
                     border-radius:8px; color:white; padding:6px 10px; font-size:12px;
                 "/>
-                <button onclick="bookConcert('${suggestion.artist}')" style="
+                <button onclick="bookConcert('${suggestion.artist}', this)" style="
                   background:linear-gradient(135deg,#6C3FC7,#E91E8C); border:none;
                   border-radius:8px; color:white; padding:6px 14px; cursor:pointer; font-size:12px;
                 ">Book Now →</button>
@@ -2220,19 +2221,27 @@ const setupMcpPolling = () => {
   console.log('🔄 MCP polling started');
 };
 
-async function bookConcert(artist) {
+async function bookConcert(artist, button) {
   const emailInput = document.getElementById(`booking-email-${artist}`);
   const email = emailInput ? emailInput.value.trim() : "";
   if (!email) {
     if (window.addChatMessage) window.addChatMessage("🤖 Please enter your email address to complete the booking.");
     return;
   }
+
+  // Extract event_id from the concert details text
+  const card = button ? button.closest('.concert-booking-card') : null;
+  const detailsEl = card ? card.querySelector('.concert-details') : null;
+  const concertData = detailsEl ? detailsEl.textContent : "";
+  const eventMatch = concertData.match(/ID:\s*(EVT\d+)/);
+  const event_id = eventMatch ? eventMatch[1] : null;
+
   if (window.addChatMessage) window.addChatMessage("🤖 Checking available concerts and completing your booking...");
   try {
-    const resp = await fetch(`${BACKEND_URL}/route-booking`, {
+    const resp = await fetch(`${BACKEND_URL}/concert-book`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json', 'ngrok-skip-browser-warning': 'true' },
-      body: JSON.stringify({ artist, user_email: email, quantity: 1 })
+      body: JSON.stringify({ event_id, user_email: email, quantity: 1 })
     });
     const data = await resp.json();
     if (data.success) {
