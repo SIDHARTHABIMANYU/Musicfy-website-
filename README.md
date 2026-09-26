@@ -35,6 +35,10 @@ Clone the repo, run: npm install, then npm run dev
 
 Requires the backend API URL — see .env.example. None of these are committed to this repository.
 
+## Note
+
+The backend also exposes dual MCP (Model Context Protocol) server transports, allowing Claude Desktop and claude.ai to control playback on this platform directly. See the musicfy-ai-backend repo for that implementation.
+
 ## Status
 
 Built and deployed as part of an AI Engineering internship at Spinacle Technologies.
